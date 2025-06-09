@@ -16,7 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-public class CustomerView implements Observer {
+public class ManagerView implements Observer {
 
     private final Stage stage;
     private final Label progressLabel;
@@ -26,17 +26,16 @@ public class CustomerView implements Observer {
     private final Label percentageLabel;
     private final int totalSteps; // Store total steps for sandwich making
     private final String[] customerBoxColors = {"#FFB6C1", "#ADD8E6", "#90EE90", "#FFD700", "#E6E6FA"};
-    private final boolean isDriveThru; // true, if the display is at the drive thru, false if it is in the restaurant
+    private int servedCustomerCount;
 
-    public CustomerView(String title, boolean isDriveThru) {
-
-        this.isDriveThru = isDriveThru;
-
+    public ManagerView(String title) {
         stage = new Stage();
         stage.setTitle(title);
 
         BorderPane root = new BorderPane();
         this.totalSteps = Ingredient.count(); // Initialize total steps
+
+        this.servedCustomerCount = 0;
 
         root.setPadding(new Insets(15));
 
@@ -97,7 +96,7 @@ public class CustomerView implements Observer {
     @Override
     public void update(String currentProgressText, List<Customer> customerQueue, int currentStep) {
         Platform.runLater(() -> {
-            progressLabel.setText("Current Status:\n" + currentProgressText);
+            progressLabel.setText("Served customers: " + this.servedCustomerCount + "\nCurrent Status:\n" + currentProgressText);
 
             // Update queue title
             queueTitleLabel.setText("Customer Queue (" + customerQueue.size() + "):");
@@ -111,24 +110,20 @@ public class CustomerView implements Observer {
             } else {
                 for (Customer customer : customerQueue) {
                     String customerName = customer.getName();
-                    if (customer.isInCar() == this.isDriveThru) {
-                        // only show the orders of the customers at this location (either drive thru or restaurant)
-                        // mapping customer ids to unique colors
-                        int colorIndex = customer.getCustomerId() % customerBoxColors.length;
-                        String chosenColor = customerBoxColors[colorIndex];
-                        Label customerBox = new Label(customerName);
-                        customerBox.setFont(Font.font(12));
-                        customerBox.setStyle("-fx-border-color: black; -fx-padding: 5px; -fx-background-color: " + chosenColor + ";");
-                        customerQueueBox.getChildren().add(customerBox);
+                    if (customer.isInCar()) {
+                        // customer is in drive thru
+                        customerName = customerName + " (D)";
+                    } else {
+                        // customer is in restaurant
+                        customerName = customerName + " (R)";
                     }
-
-                }
-                // check if customers are the current location
-                if (customerQueueBox.getChildren().isEmpty()) {
-                    // no customer is at the current location -> show empty queue
-                    Label emptyLabel = new Label("Empty");
-                    emptyLabel.setFont(Font.font(12));
-                    customerQueueBox.getChildren().add(emptyLabel);
+                    // mapping customer ids to unique colors
+                    int colorIndex = customer.getCustomerId() % customerBoxColors.length;
+                    String chosenColor = customerBoxColors[colorIndex];
+                    Label customerBox = new Label(customerName);
+                    customerBox.setFont(Font.font(12));
+                    customerBox.setStyle("-fx-border-color: black; -fx-padding: 5px; -fx-background-color: " + chosenColor + ";");
+                    customerQueueBox.getChildren().add(customerBox);
                 }
             }
 
@@ -136,6 +131,10 @@ public class CustomerView implements Observer {
             if (this.totalSteps > 0) {
                 percentComplete = (int) (((double) currentStep / this.totalSteps) * 100);
                 sandwichProgressBar.setProgress((double) currentStep / this.totalSteps);
+                if (currentProgressText != null && currentProgressText.endsWith("COMPLETE!")) {
+                    // new served customer
+                    this.servedCustomerCount++;
+                }
             } else {
                 sandwichProgressBar.setProgress(0); //handling of div by 0
             }
