@@ -11,11 +11,16 @@ public class App extends Application {
     public void start(Stage primaryStage) {
         primaryStage.hide(); // Hide the default stage as we are creating our own.
 
-        Chef chef = new Chef(); // Our Subject
+        Restaurant restaurant = new Restaurant(); // Our Subject
+
+        //  Add 3 initial customers
+        restaurant.addNewCustomerToQueue();
+        restaurant.addNewCustomerToQueue();
+        restaurant.addNewCustomerToQueue();
 
         // Window dimensions and spacing
         double windowWidth = 400;  // Width of each CustomerView window
-        double windowHeight = 350; // Height of each CustomerView window
+        double windowHeight = 400; // Height of each CustomerView window
         double xSpacing = 30;      // Horizontal spacing between windows
 
         // Get screen dimensions
@@ -33,27 +38,27 @@ public class App extends Application {
         double startY = (screenHeight - windowHeight) / 2;
 
         // Create and position Observers (Views)
-        CustomerView managerView = new CustomerView("Restaurant Manager");
+        ManagerView managerView = new ManagerView("Restaurant Manager");
         managerView.setPosition(startX, startY);
 
-        CustomerView driveThruView = new CustomerView("Drive Thru Display");
+        CustomerView driveThruView = new CustomerView("Drive Thru Display", true);
         driveThruView.setPosition(startX + windowWidth + xSpacing, startY);
 
-        CustomerView waitingAreaView = new CustomerView("Waiting Area Screen");
+        CustomerView waitingAreaView = new CustomerView("Waiting Area Screen", false);
         waitingAreaView.setPosition(startX + 2 * (windowWidth + xSpacing), startY);
 
-        // This is where the Chef is informed of observers.
-        chef.registerObserver(managerView);
-        chef.registerObserver(driveThruView);
-        chef.registerObserver(waitingAreaView);
+        // This is where the restaurant is informed of observers.
+        restaurant.registerObserver(managerView);
+        restaurant.registerObserver(driveThruView);
+        restaurant.registerObserver(waitingAreaView);
 
         // Show the views
         managerView.show();
         driveThruView.show();
         waitingAreaView.show();
 
-        // Start the chef's work cycle
-        chef.startWorkingCycle();
+        // Start the restaurant's work cycle
+        restaurant.startWorkingCycle();
     }
 
     public static void main(String[] args) {
