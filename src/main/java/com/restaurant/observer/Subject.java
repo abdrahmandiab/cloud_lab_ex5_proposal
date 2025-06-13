@@ -7,7 +7,7 @@ public abstract class Subject {
 
     protected final List<Observer> observers;
 
-    public Subject() {
+    protected Subject() {
         this.observers = new ArrayList<>();
     }
 

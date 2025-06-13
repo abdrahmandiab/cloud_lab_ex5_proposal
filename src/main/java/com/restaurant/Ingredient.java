@@ -21,8 +21,6 @@ public enum Ingredient {
 
     @Override
     public String toString() {
-        // This allows us to directly use the enum constant
-        // where its display name string is expected.
         return displayName;
     }
 
